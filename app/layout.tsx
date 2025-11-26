@@ -1,11 +1,12 @@
 import "./globals.css";
-import { QueryProvider } from "@/providers/query-provider";
+import Navigation from "@/components/Navigation";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body>
-        <QueryProvider>{children}</QueryProvider>
+        <Navigation />
+        <main className="pt-20">{children}</main>
       </body>
     </html>
   );
