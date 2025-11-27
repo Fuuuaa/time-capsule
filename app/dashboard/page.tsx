@@ -2,6 +2,7 @@
 
 import { useCapsules } from "@/store/capsules";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 function formatRemaining(ms: number) {
   const total = Math.floor(ms / 1000);
@@ -41,29 +42,27 @@ export default function DashboardPage() {
           const isOpen = diff <= 0;
 
           return (
-            <div
-              key={c.id}
-              className={`border rounded p-4 flex justify-between items-start gap-4 ${
-                isOpen ? "bg-green-50 border-green-400" : "bg-gray-100"
-              }`}
-            >
-              <div>
+            <div key={c.id} className="border p-4 rounded hover:bg-gray-50 transition">
+              <Link href={`/capsule/${c.id}`} className="block cursor-pointer">
                 <h2 className="text-xl font-semibold">{c.title}</h2>
 
                 <p className="text-sm text-gray-500">Откроется: {openDate.toLocaleString()}</p>
 
-                {!isOpen && (
-                  <p className="text-red-600 mt-2">⏳ Осталось: {formatRemaining(diff)}</p>
+                {!isOpen && <p className="text-red-600 mt-2">Осталось: {formatRemaining(diff)}</p>}
+
+                <p className={`text-sm ${isOpen ? "text-green-600" : "text-red-500"}`}>
+                  {isOpen ? "ОТКРЫТА" : "ЗАКРЫТА"}
+                </p>
+
+                {isOpen ? (
+                  <p>{c.message}</p>
+                ) : (
+                  <p className="italic text-gray-400">Откроется позже</p>
                 )}
+              </Link>
 
-                {isOpen && <p className="mt-2 whitespace-pre-wrap">{c.message}</p>}
-              </div>
-
-              <button
-                onClick={() => removeCapsule(c.id)}
-                className="text-red-600 hover:text-red-800 text-sm"
-              >
-                Удалить
+              <button onClick={() => removeCapsule(c.id)} className="text-red-500 text-sm mt-2">
+                 Удалить
               </button>
             </div>
           );
