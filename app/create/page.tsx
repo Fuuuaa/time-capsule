@@ -29,7 +29,7 @@ export default function CreateCapsulePage() {
 
   return (
     <div className="max-w-xl mx-auto pt-20 px-4">
-      <h1 className="text-3xl font-bold mb-6">Создать капсулу</h1>
+      <h1 className="btn btn-primary">Создать капсулу</h1>
 
       <div className="flex flex-col gap-4">
         <input

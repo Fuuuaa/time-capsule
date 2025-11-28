@@ -1,73 +1,54 @@
 "use client";
 
 import { useCapsules } from "@/store/capsules";
-import { useEffect, useState } from "react";
-import Link from "next/link";
+import CapsuleCard from "@/components/CapsuleCard";
+import CapsuleFilters from "@/components/CapsuleFilters";
+import { useState } from "react";
 
-function formatRemaining(ms: number) {
-  const total = Math.floor(ms / 1000);
-  const d = Math.floor(total / 86400);
-  const h = Math.floor((total % 86400) / 3600);
-  const m = Math.floor((total % 3600) / 60);
-  const s = total % 60;
+export default function Dashboard() {
+  const { capsules, removeCapsule } = useCapsules();
 
-  return `${d}д ${h}ч ${m}м ${s}с`;
-}
+  const [query, setQuery] = useState("");
+  const [status, setStatus] = useState("all");
+  const [sort, setSort] = useState("new");
 
-export default function DashboardPage() {
-  const capsules = useCapsules((s) => s.capsules);
-  const removeCapsule = useCapsules((s) => s.removeCapsule);
-  const [, setTick] = useState(0);
+  const filtered = capsules
+    .filter((c) => {
+      const matchQuery =
+        c.title.toLowerCase().includes(query.toLowerCase()) ||
+        c.message.toLowerCase().includes(query.toLowerCase());
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setTick((v) => v + 1);
-    }, 1000);
+      const open = Date.now() >= new Date(c.openAt).getTime();
 
-    return () => clearInterval(timer);
-  }, []);
+      const matchStatus =
+        status === "all" || (status === "open" && open) || (status === "closed" && !open);
 
-  const now = new Date();
+      return matchQuery && matchStatus;
+    })
+    .sort((a, b) => {
+      const tA = new Date(a.openAt).getTime();
+      const tB = new Date(b.openAt).getTime();
+      return sort === "new" ? tB - tA : tA - tB;
+    });
 
   return (
-    <div className="max-w-3xl mx-auto pt-20 px-4">
-      <h1 className="text-3xl font-bold mb-6">Твои капсулы</h1>
+    <main className="p-4">
+      <h1 className="text-2xl font-bold mb-4">Мои капсулы</h1>
 
-      <div className="flex flex-col gap-4">
-        {capsules.length === 0 && <p className="text-gray-500">Пока нет капсул</p>}
+      <CapsuleFilters
+        query={query}
+        setQuery={setQuery}
+        status={status}
+        setStatus={setStatus}
+        sort={sort}
+        setSort={setSort}
+      />
 
-        {capsules.map((c) => {
-          const openDate = new Date(c.openAt);
-          const diff = openDate.getTime() - now.getTime();
-          const isOpen = diff <= 0;
-
-          return (
-            <div key={c.id} className="border p-4 rounded hover:bg-gray-50 transition">
-              <Link href={`/capsule/${c.id}`} className="block cursor-pointer">
-                <h2 className="text-xl font-semibold">{c.title}</h2>
-
-                <p className="text-sm text-gray-500">Откроется: {openDate.toLocaleString()}</p>
-
-                {!isOpen && <p className="text-red-600 mt-2">Осталось: {formatRemaining(diff)}</p>}
-
-                <p className={`text-sm ${isOpen ? "text-green-600" : "text-red-500"}`}>
-                  {isOpen ? "ОТКРЫТА" : "ЗАКРЫТА"}
-                </p>
-
-                {isOpen ? (
-                  <p>{c.message}</p>
-                ) : (
-                  <p className="italic text-gray-400">Откроется позже</p>
-                )}
-              </Link>
-
-              <button onClick={() => removeCapsule(c.id)} className="text-red-500 text-sm mt-2">
-                 Удалить
-              </button>
-            </div>
-          );
-        })}
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {filtered.map((c) => (
+          <CapsuleCard key={c.id} capsule={c} onDelete={removeCapsule} />
+        ))}
       </div>
-    </div>
+    </main>
   );
 }

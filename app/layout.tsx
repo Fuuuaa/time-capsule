@@ -14,7 +14,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
   return (
     <html lang="en">
-      <body>
+      <body
+        className="min-h-screen text-[color:var(--text-main)]"
+        style={{ background: "var(--bg-main)" }}
+      >
         <Navigation />
         <main className="pt-20">{children}</main>
       </body>
